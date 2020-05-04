@@ -22,17 +22,17 @@ Use the following commands to install:
 pip install pandas==1.0.3
 ```
 Or
-
 ```
 conda install pandas=1.0.3
 ```
+
+And
 
 
 ```
 pip install -U scikit-learn
 ```
 Or
-
 ```
 conda install scikit-learn=0.22.2
 ```
@@ -59,7 +59,7 @@ There are three folders that contain all the data and scripts needed for the pro
     * go.html: template for message classifications request
     * master.html: master template
     
-  * GridSearch.ipynb: used to find paramaters of optimal performance
+* GridSearch.ipynb: used to find paramaters of optimal performance
 
 ## How to Run
 
