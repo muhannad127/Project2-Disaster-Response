@@ -26,7 +26,7 @@ Or
 conda install pandas=1.0.3
 ```
 
-
+And
 
 
 ```
