@@ -22,17 +22,17 @@ Use the following commands to install:
 pip install pandas==1.0.3
 ```
 Or
-
 ```
 conda install pandas=1.0.3
 ```
+
+
 
 
 ```
 pip install -U scikit-learn
 ```
 Or
-
 ```
 conda install scikit-learn=0.22.2
 ```
