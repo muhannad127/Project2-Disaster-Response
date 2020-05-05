@@ -146,7 +146,7 @@ def save_model(model, model_filepath):
     
     """
     DESCRIPTION: 
-                Output metrics to analyze model performance
+                Save model to current directory using joblib
     
     INPUT: 
             model: (sklearn.pipeline.Pipeline) model
