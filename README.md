@@ -104,5 +104,3 @@ Then type the following commands:
 cd ../app
 python run.py
 ```
-
-To clarify, GridSearchCV was used to find paramaters for optimal performance. However, it will not be found in scripts because it takes a long time to finish running. Hence, it is included in the jupyter notebook provided
