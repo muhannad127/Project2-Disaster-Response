@@ -5,6 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 from sqlalchemy import create_engine
 from joblib import dump, load
@@ -15,13 +16,15 @@ import sklearn
 import re
 import sys
 import nltk
+
+
 nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
 
 url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 def load_data(database_filepath):
 
-    '''
+    """
     DESCRIPTION: 
                 load dataset from SQL database and split to X and Y
                 to train model
@@ -32,7 +35,8 @@ def load_data(database_filepath):
     OUTPUT:
         X: (pandas.Series) messages 
         Y: (pandas.DataFrame) Categories
-    '''
+        Y.columns: (list) a list of the category names
+    """
     # create engine for SQL database
     engine = create_engine('sqlite:///'+database_filepath)
     
@@ -47,7 +51,7 @@ def load_data(database_filepath):
 
 def tokenize(text):
 
-    '''
+    """
     DESCRIPTION: 
                 Tokenize, lemmetize, and normalize text before
                 feeding to machine learning model
@@ -57,7 +61,7 @@ def tokenize(text):
         
     OUTPUT:
         clean_tokens: (list) list of processed tokens 
-    '''
+    """
     
     #tokenize text
     tokens = word_tokenize(text)
@@ -75,7 +79,7 @@ def tokenize(text):
     
 def build_model():
 
-    '''
+    """
     DESCRIPTION: 
                 Build SVC model with optimal params found using GridSearch
     
@@ -83,20 +87,36 @@ def build_model():
             None
         
     OUTPUT:
-        pipeline: (sklearn.pipeline.Pipeline) model 
-    '''
+        cv: (sklearn.model_selection.GridSearchCV) model 
+    """
+    
+    # the ml pipeline
+    # use 'liblinear' to test both l1 and l2 
     pipeline = Pipeline([
-    ('vec', CountVectorizer(max_df=1.0, ngram_range= (1,1),tokenizer=tokenize)),
-    ('tfidf', TfidfTransformer(use_idf=True)),
-    ( 'multi_out_clf', MultiOutputClassifier(LogisticRegression(penalty='l1', solver='liblinear')))
+    ('vec', CountVectorizer(tokenizer=tokenize)),
+    ('tfidf', TfidfTransformer()),
+    ( 'multi_out_clf', MultiOutputClassifier(LogisticRegression(solver='liblinear')))
         
     ])
     
-    return pipeline
+    # paramaters to try and choose from
+    parameters = {
+        'vec__ngram_range': ((1, 1), (1, 2)),
+        'vec__max_df': (0.75, 1.0),
+        'vec__max_features': (None, 5000, 10000),
+        'tfidf__use_idf': (True, False),
+        'multi_out_clf__estimator__penalty': ['l1', 'l2']
+    }
+    
+    # Instanciate GridSearchCV object to find best params and select best model
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+    
+    return cv
+
 
 def evaluate_model(model, X_test, Y_test, category_names):
 
-    '''
+    """
     DESCRIPTION: 
                 Output metrics to analyze model performance
     
@@ -108,7 +128,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
         
     OUTPUT:
         None
-    '''
+    """
     # predict on x_test
     Y_pred= model.predict(X_test)
     # convert Y_test to numpy array
@@ -124,7 +144,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 def save_model(model, model_filepath):
     
-    '''
+    """
     DESCRIPTION: 
                 Output metrics to analyze model performance
     
@@ -134,7 +154,7 @@ def save_model(model, model_filepath):
         
     OUTPUT:
         None
-    '''
+    """
     
     #dump model
     dump(model, model_filepath) 
@@ -142,9 +162,12 @@ def save_model(model, model_filepath):
     
 
 def main():
+    
+    ''' Main function to train, evaluate, and save machine learning model'''
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
+        
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         
@@ -158,6 +181,7 @@ def main():
         evaluate_model(model, X_test, Y_test, category_names)
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
+        
         save_model(model, model_filepath)
 
         print('Trained model saved!')

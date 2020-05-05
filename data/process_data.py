@@ -7,7 +7,7 @@ import sys
 
 
 def load_data(messages_filepath, categories_filepath):
-    '''
+    """
     DESCRIPTION: 
                 Load two csv files into a dataframe, merge them,
                 and return the result  
@@ -18,7 +18,7 @@ def load_data(messages_filepath, categories_filepath):
         
      OUTPUT:
             df: (pandas.DataFrame) dataframe of merged messages and categories data
-    '''
+    """
     
     #messages
     messages = pd.read_csv(messages_filepath) 
@@ -35,7 +35,7 @@ def load_data(messages_filepath, categories_filepath):
 
 def clean_data(df):
 
-    '''
+    """
     DESCRIPTION:
             Get data ready for ml model: split and replace category vals with
             numeric values indicating status of category, remove duplicates,
@@ -46,7 +46,7 @@ def clean_data(df):
     
     OUTPUT:
         df_clean: (pandas.DataFrame) clean data
-    '''
+    """
     # Split categories to different columns
     #print(df.columns)
     categories = df['categories'].str.split(pat=';',expand=True)
@@ -87,7 +87,7 @@ def clean_data(df):
 def save_data(df, database_filename):
     
     
-    '''
+    """
     DESCRIPTION: 
                 Save processed data in a database table to be accessed 
                 later on 
@@ -98,7 +98,7 @@ def save_data(df, database_filename):
         
     OUTPUT:
         None
-    '''
+    """
     # create engine for SQL database 
     engine = create_engine('sqlite:///'+ database_filename)
     
@@ -107,6 +107,8 @@ def save_data(df, database_filename):
 
 
 def main():
+    ''' Main function to run ETL pipeline'''
+    
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
@@ -134,3 +136,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
